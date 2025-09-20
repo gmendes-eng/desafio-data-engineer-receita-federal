@@ -2,8 +2,10 @@
 
 from pyspark.sql import SparkSession
 
+# Objetivo: Ter um ponto de entrada único para o nosso pipeline. Este script não fará transformações, ele apenas chamará as funções corretas na ordem certa.
+
 # Importaremos as funções dos outros módulos aqui
-# from ingestion import executar_ingestao
+from ingestion import executar_ingestao
 # from transformations import executar_transformacao_silver, executar_transformacao_gold
 # from database import carregar_dados_no_banco
 
@@ -23,7 +25,7 @@ def main():
 
     # --- ETAPA DE INGESTÃO (CAMADA BRONZE) ---
     # Aqui chamaremos a função para baixar e descompactar os dados.
-    # executar_ingestao()
+    executar_ingestao()
     print("ETAPA BRONZE: Ingestão de dados concluída (simulação).")
 
 
