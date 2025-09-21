@@ -3,7 +3,7 @@
 from pyspark.sql import SparkSession
 from ingestion import executar_ingestao
 from transformations import transformar_dados_silver, transformar_dados_gold
-from database import carregar_dados_no_banco # Descomentamos a importação final
+from database import carregar_dados_no_banco
 
 def main():
     """
@@ -26,9 +26,9 @@ def main():
     # --- ETAPA DE TRANSFORMAÇÃO (CAMADA GOLD) ---
     # Chama a função Gold e armazena o DataFrame final
     df_gold = transformar_dados_gold(spark)
-    # Apenas para ver o resultado no log (opcional, bom para depuração)
+    # Apenas para ver o resultado no log
     print("Amostra dos dados Gold para verificação:")
-    df_gold.show(50, truncate=False) # Mantemos para verificação no log
+    df_gold.show(50, truncate=False) # Para verificação no log
 
     # --- ETAPA DE CARREGAMENTO (LOAD) ---
     # Chamamos a função final, passando o DataFrame Gold
