@@ -1,20 +1,14 @@
-# src/main.py
+# src/main.py (VERSÃO FINAL COMPLETA)
 
 from pyspark.sql import SparkSession
-
-# Objetivo: Ter um ponto de entrada único para o nosso pipeline. Este script não fará transformações, ele apenas chamará as funções corretas na ordem certa.
-
-# Importaremos as funções dos outros módulos aqui
 from ingestion import executar_ingestao
-# from transformations import executar_transformacao_silver, executar_transformacao_gold
-# from database import carregar_dados_no_banco
+from transformations import transformar_dados_silver, transformar_dados_gold
+from database import carregar_dados_no_banco # Descomentamos a importação final
 
 def main():
     """
     Função principal que orquestra a execução do pipeline de dados.
     """
-    # 1. Inicializa a SparkSession
-    # A SparkSession é o ponto de entrada para qualquer funcionalidade do Spark.
     spark = SparkSession.builder \
         .appName("PipelineReceitaFederal") \
         .config("spark.jars.packages", "org.postgresql:postgresql:42.6.0") \
@@ -24,34 +18,24 @@ def main():
     print("Pipeline iniciado. SparkSession criada.")
 
     # --- ETAPA DE INGESTÃO (CAMADA BRONZE) ---
-    # Aqui chamaremos a função para baixar e descompactar os dados.
     executar_ingestao()
-    print("ETAPA BRONZE: Ingestão de dados concluída (simulação).")
-
 
     # --- ETAPA DE TRANSFORMAÇÃO (CAMADA SILVER) ---
-    # Aqui chamaremos a função para limpar e estruturar os dados.
-    # df_empresas_silver, df_socios_silver = executar_transformacao_silver(spark)
-    print("ETAPA SILVER: Transformação de dados concluída (simulação).")
-
+    transformar_dados_silver(spark)
 
     # --- ETAPA DE TRANSFORMAÇÃO (CAMADA GOLD) ---
-    # Aqui chamaremos a função para aplicar as regras de negócio.
-    # df_gold = executar_transformacao_gold(df_empresas_silver, df_socios_silver)
-    print("ETAPA GOLD: Aplicação das regras de negócio concluída (simulação).")
-
+    # Chama a função Gold e armazena o DataFrame final
+    df_gold = transformar_dados_gold(spark)
+    # Apenas para ver o resultado no log (opcional, bom para depuração)
+    print("Amostra dos dados Gold para verificação:")
+    df_gold.show(50, truncate=False) # Mantemos para verificação no log
 
     # --- ETAPA DE CARREGAMENTO (LOAD) ---
-    # Aqui chamaremos a função para salvar o resultado no PostgreSQL.
-    # carregar_dados_no_banco(df_gold)
-    print("ETAPA DE CARREGAMENTO: Dados salvos no PostgreSQL (simulação).")
-
+    # Chamamos a função final, passando o DataFrame Gold
+    carregar_dados_no_banco(df_gold)
 
     print("Pipeline concluído com sucesso!")
-
-    # Encerra a SparkSession
     spark.stop()
-
 
 if __name__ == "__main__":
     main()
