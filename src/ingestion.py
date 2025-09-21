@@ -1,14 +1,15 @@
-# src/ingestion.py
+# src/ingestion.py (VERSÃO CORRIGIDA COM A URL CORRETA)
 
 import requests
 import zipfile
 from pathlib import Path
 
-# URLs diretas para os arquivos ZIP. Para o desafio, usamos apenas um de cada.
-# Em um cenário real, poderíamos ter uma lista de todos os arquivos.
+# URLs corrigidas com base na nova estrutura encontrada.
+BASE_URL = "https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/2025-09/"
+
 URLS = [
-    "https://dadosabertos.rfb.gov.br/CNPJ/Empresas0.zip",
-    "https://dadosabertos.rfb.gov.br/CNPJ/Socios0.zip"
+    f"{BASE_URL}Empresas0.zip",
+    f"{BASE_URL}Socios0.zip"
 ]
 
 # Define o caminho para a camada bronze
@@ -32,7 +33,9 @@ def executar_ingestao():
         try:
             # 1. Download do arquivo
             print(f"Baixando o arquivo: {zip_filename}...")
-            response = requests.get(url, stream=True)
+            # Adicionamos um header para simular um navegador, o que pode ajudar
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
+            response = requests.get(url, headers=headers, stream=True)
             # Lança uma exceção se o status code não for de sucesso (2xx)
             response.raise_for_status()
             

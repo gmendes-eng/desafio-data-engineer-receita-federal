@@ -208,3 +208,6 @@ __marimo__/
 
 # Ignorar ambientes virtuais do Python
 venv/
+
+# Ignorar a pasta de dados inteira
+data/
