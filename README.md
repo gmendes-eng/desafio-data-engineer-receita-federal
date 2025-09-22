@@ -14,43 +14,48 @@ O pipeline foi construído utilizando a arquitetura Medallion **(Bronze, Silver,
 O diagrama abaixo ilustra o fluxo completo, desde a fonte dos dados até o armazenamento final:
 
 ```mermaid
-graph TD;
-    subgraph "Fonte de Dados Externa"
-        A["<b>Fonte: Receita Federal</b><br>Arquivos .zip"]
-    end
+graph TD
+    %% Fonte de Dados Externa
+    A[Fonte de Dados Externa<br/>Receita Federal<br/>Arquivos .zip] --> B
 
-    subgraph "Ambiente Dockerizado (docker-compose)"
-        subgraph "Container da Aplicação (app_stone)"
-            B("<b>1. Ingestão</b><br>ingestion.py")
+    %% Container da Aplicação (Dockerizado)
+    subgraph Docker ["Ambiente Dockerizado"]
+        subgraph AppContainer ["Container da Aplicação - app_stone"]
+            B[1. Ingestão<br/>ingestion.py] --> C[Bronze<br/>CSVs brutos]
+            C --> D[2. Transformação<br/>PySpark<br/>transformations.py]
             
-            subgraph " "
-                direction LR
-                C("<b>Bronze</b><br>CSVs brutos")
-                D("<b>Silver</b><br>Parquet limpo")
-                E("<b>Gold</b><br>Parquet agregado")
-            end
-
-            F("<b>2. Transformação</b><br>PySpark<br>transformations.py")
+            D --> E[Silver<br/>Parquet limpo]
+            E --> F[Gold<br/>Parquet agregado]
         end
-
-        subgraph "Container do Banco de Dados (db_stone)"
-            G["<b>3. Armazenamento</b><br>PostgreSQL<br>Tabela Final"]
+        
+        subgraph DBContainer ["Container do Banco de Dados"]
+            G[3. Armazenamento<br/>PostgreSQL<br/>Tabela Final]
         end
+        
+        F --> G
     end
-
-    subgraph "Consumidores Finais"
-        H["<b>4. Consumo</b><br>Aplicações Transacionais"]
+    
+    %% Consumidores Finais
+    subgraph Consumers ["Consumidores Finais"]
+        H[4. Consumo]
     end
+    
+    G --> H
 
-    %% Fluxo do Pipeline
-    A --> B;
-    B --> C;
-    C --> F;
-    F --> D;
-    D --> F;
-    F --> E;
-    F --> G;
-    G --> H;
+    %% Estilos
+    classDef external fill:#e1f5fe,stroke:#01579b,stroke-width:2px
+    classDef bronze fill:#fff3e0,stroke:#e65100,stroke-width:2px
+    classDef silver fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    classDef gold fill:#fff8e1,stroke:#ff6f00,stroke-width:2px
+    classDef database fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
+    classDef consumer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
+    
+    class A external
+    class C bronze
+    class E silver
+    class F gold
+    class G database
+    class H consumer
 ```
 
 ### Tecnologias Utilizadas
