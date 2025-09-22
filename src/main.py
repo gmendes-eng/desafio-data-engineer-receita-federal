@@ -1,4 +1,4 @@
-# src/main.py (VERSÃO FINAL COMPLETA)
+# src/main.py
 
 from pyspark.sql import SparkSession
 from ingestion import executar_ingestao

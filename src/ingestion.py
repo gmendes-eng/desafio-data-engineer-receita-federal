@@ -1,10 +1,10 @@
-# src/ingestion.py (VERSÃO CORRIGIDA COM A URL CORRETA)
+# src/ingestion.py
 
 import requests
 import zipfile
 from pathlib import Path
 
-# URLs corrigidas com base na nova estrutura encontrada.
+# URLs com base na estrutura encontrada.
 BASE_URL = "https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/2025-09/"
 
 URLS = [
