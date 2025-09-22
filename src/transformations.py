@@ -14,7 +14,7 @@ def transformar_dados_silver(spark: SparkSession):
     """
     print("Iniciando a transformação de dados para a Camada Silver...")
 
-    bronze_path = "data/bronze/"
+    bronze_path = "data/bronze/raw_files/"
     silver_path = "data/silver/"
 
     # ----- Processamento de Empresas -----

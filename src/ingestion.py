@@ -4,7 +4,7 @@ import requests
 import zipfile
 from pathlib import Path
 
-# URLs com base na estrutura encontrada.
+# URL base com a pasta de data
 BASE_URL = "https://arquivos.receitafederal.gov.br/dados/cnpj/dados_abertos_cnpj/2025-09/"
 
 URLS = [
@@ -12,42 +12,43 @@ URLS = [
     f"{BASE_URL}Socios0.zip"
 ]
 
-# Define o caminho para a camada bronze
-BRONZE_PATH = Path("data/bronze")
+# Define os caminhos para as novas subpastas da camada bronze
+ARCHIVES_PATH = Path("data/bronze/archives")
+RAW_FILES_PATH = Path("data/bronze/raw_files")
 
 def executar_ingestao():
     """
     Realiza o download e a descompactação dos dados da Receita Federal
-    para a camada Bronze.
+    para a camada Bronze, separando os arquivos .zip dos dados brutos.
     """
-    print("Iniciando a etapa de ingestão (Camada Bronze)...")
+    print("Iniciando a etapa de ingestão (Camada Bronze Refinada)...")
     
-    # Cria o diretório da camada bronze, se não existir
-    BRONZE_PATH.mkdir(parents=True, exist_ok=True)
+    # Cria os diretórios da camada bronze, se não existirem
+    ARCHIVES_PATH.mkdir(parents=True, exist_ok=True)
+    RAW_FILES_PATH.mkdir(parents=True, exist_ok=True)
     
     for url in URLS:
-        # Extrai o nome do arquivo da URL
         zip_filename = url.split("/")[-1]
-        zip_filepath = BRONZE_PATH / zip_filename
+        # O arquivo .zip será salvo na pasta 'archives'
+        zip_filepath = ARCHIVES_PATH / zip_filename
         
         try:
             # 1. Download do arquivo
             print(f"Baixando o arquivo: {zip_filename}...")
-            # Adicionamos um header para simular um navegador, o que pode ajudar
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
+            headers = {'User-Agent': 'Mozilla/5.0'}
             response = requests.get(url, headers=headers, stream=True)
-            # Lança uma exceção se o status code não for de sucesso (2xx)
             response.raise_for_status()
             
             with open(zip_filepath, "wb") as f:
                 for chunk in response.iter_content(chunk_size=8192):
                     f.write(chunk)
-            print(f"Download de {zip_filename} concluído.")
+            print(f"Download de {zip_filename} concluído e salvo em {ARCHIVES_PATH}.")
             
-            # 2. Descompactação do arquivo
-            print(f"Descompactando {zip_filename}...")
+            # 2. Descompactação do arquivo para a pasta 'raw_files'
+            print(f"Descompactando {zip_filename} para {RAW_FILES_PATH}...")
             with zipfile.ZipFile(zip_filepath, 'r') as zip_ref:
-                zip_ref.extractall(BRONZE_PATH)
+                # Extrai os arquivos para o diretório de arquivos brutos
+                zip_ref.extractall(RAW_FILES_PATH)
             print(f"Arquivo {zip_filename} descompactado com sucesso.")
 
         except requests.exceptions.RequestException as e:
