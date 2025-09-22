@@ -16,41 +16,41 @@ O diagrama abaixo ilustra o fluxo completo, desde a fonte dos dados até o armaz
 ```mermaid
 graph TD;
     subgraph "Fonte de Dados Externa"
-        A[🌐<br>Portal de Dados Abertos<br>Receita Federal<br>(Arquivos .zip)]
+        A["<b>Portal de Dados Abertos</b><br>Receita Federal<br>(Arquivos .zip)"]
     end
 
     subgraph "Ambiente Dockerizado (docker-compose)"
         subgraph "Container da Aplicação (app_stone)"
-            B(🐍<br>Script de Ingestão<br>ingestion.py)
+            B("<b>Script de Ingestão</b><br>ingestion.py")
             
             subgraph "Camadas (Sistema de Arquivos do Container)"
-                C(🥉<br>Camada Bronze<br>data/bronze<br>CSVs brutos)
-                D(🥈<br>Camada Silver<br>data/silver<br>Parquet limpo)
-                E(🥇<br>Camada Gold<br>data/gold<br>Parquet agregado)
+                C("<b>Camada Bronze</b><br>data/bronze<br>CSVs brutos")
+                D("<b>Camada Silver</b><br>data/silver<br>Parquet limpo")
+                E("<b>Camada Gold</b><br>data/gold<br>Parquet agregado")
             end
 
-            F(✨<br>Processamento com PySpark<br>transformations.py)
+            F("<b>Processamento com PySpark</b><br>transformations.py")
         end
 
         subgraph "Container do Banco de Dados (db_stone)"
-            G[🐘<br>PostgreSQL<br>Tabela 'resultado_final_desafio']
+            G["<b>PostgreSQL</b><br>Tabela 'resultado_final_desafio'"]
         end
     end
 
     subgraph "Consumidores Finais"
-        H(📈<br>Ferramenta de BI / API<br>Acessando o PostgreSQL)
+        H["<b>Ferramenta de BI / API</b><br>Acessando o PostgreSQL"]
     end
 
     %% Fluxo do Pipeline
-    A -->|"1. Download e<br>Descompactação"| B;
-    B -->| "2. Salva bruto" | C;
-    C -->| "3. Lê bruto" | F;
-    F -->| "4. Salva limpo" | D;
-    D -->| "5. Lê limpo" | F;
-    F -->| "6. Salva agregado" | E;
-    E -->| "7. Lê agregado para carregar"| F;
-    F -->| "8. Carrega no Banco" | G;
-    G -->| "9. Consulta" | H;
+    A -->|"1. Download e Descompactação"| B;
+    B -->|"2. Salva bruto"| C;
+    C -->|"3. Lê bruto"| F;
+    F -->|"4. Salva limpo"| D;
+    D -->|"5. Lê limpo"| F;
+    F -->|"6. Salva agregado"| E;
+    E -->|"7. Lê agregado para carregar"| F;
+    F -->|"8. Carrega no Banco"| G;
+    G -->|"9. Consulta"| H;
 ```
 
 ### 🛠️ Tecnologias Utilizadas
