@@ -1,7 +1,7 @@
 ### Desafio de Engenharia de Dados - Pipeline da Receita Federal
 Este repositório contém a solução para o desafio de engenharia de dados, que consiste em construir um pipeline para ingestão, processamento e armazenamento de dados públicos de CNPJ da Receita Federal.
 
-### 📝 Descrição do Projeto
+### Descrição do Projeto
 O pipeline foi construído utilizando a arquitetura Medallion **(Bronze, Silver, Gold)** para garantir a qualidade e a rastreabilidade dos dados. O processo completo é orquestrado com Docker e Docker Compose, permitindo que todo o ambiente seja executado com um único comando.
 
 **Camada Bronze:** Ingestão dos dados brutos (.zip) da fonte oficial.
@@ -10,50 +10,50 @@ O pipeline foi construído utilizando a arquitetura Medallion **(Bronze, Silver,
 
 **Camada Gold:** Aplicação das regras de negócio solicitadas no desafio (cálculo de quantidade de sócios, flags, etc.), com o resultado salvo em Parquet e carregado em um banco de dados.
 
-### 🏛️ Desenho da Arquitetura da Solução
+### Desenho da Arquitetura da Solução
 O diagrama abaixo ilustra o fluxo completo, desde a fonte dos dados até o armazenamento final:
 
 ```mermaid
 graph TD;
     subgraph "Fonte de Dados Externa"
-        A["<b>Portal de Dados Abertos</b><br>Receita Federal<br>(Arquivos .zip)"]
+        A["<b>Fonte: Receita Federal</b><br>Arquivos .zip"]
     end
 
     subgraph "Ambiente Dockerizado (docker-compose)"
         subgraph "Container da Aplicação (app_stone)"
-            B("<b>Script de Ingestão</b><br>ingestion.py")
+            B("<b>1. Ingestão</b><br>ingestion.py")
             
-            subgraph "Camadas (Sistema de Arquivos do Container)"
-                C("<b>Camada Bronze</b><br>data/bronze<br>CSVs brutos")
-                D("<b>Camada Silver</b><br>data/silver<br>Parquet limpo")
-                E("<b>Camada Gold</b><br>data/gold<br>Parquet agregado")
+            subgraph " "
+                direction LR
+                C("<b>Bronze</b><br>CSVs brutos")
+                D("<b>Silver</b><br>Parquet limpo")
+                E("<b>Gold</b><br>Parquet agregado")
             end
 
-            F("<b>Processamento com PySpark</b><br>transformations.py")
+            F("<b>2. Transformação</b><br>PySpark<br>transformations.py")
         end
 
         subgraph "Container do Banco de Dados (db_stone)"
-            G["<b>PostgreSQL</b><br>Tabela 'resultado_final_desafio'"]
+            G["<b>3. Armazenamento</b><br>PostgreSQL<br>Tabela Final"]
         end
     end
 
     subgraph "Consumidores Finais"
-        H["<b>Ferramenta de BI / API</b><br>Acessando o PostgreSQL"]
+        H["<b>4. Consumo</b><br>Aplicações Transacionais"]
     end
 
     %% Fluxo do Pipeline
-    A -->|"1. Download e Descompactação"| B;
-    B -->|"2. Salva bruto"| C;
-    C -->|"3. Lê bruto"| F;
-    F -->|"4. Salva limpo"| D;
-    D -->|"5. Lê limpo"| F;
-    F -->|"6. Salva agregado"| E;
-    E -->|"7. Lê agregado para carregar"| F;
-    F -->|"8. Carrega no Banco"| G;
-    G -->|"9. Consulta"| H;
+    A --> B;
+    B --> C;
+    C --> F;
+    F --> D;
+    D --> F;
+    F --> E;
+    F --> G;
+    G --> H;
 ```
 
-### 🛠️ Tecnologias Utilizadas
+### Tecnologias Utilizadas
 - **Linguagem:** Python 3.12
 
 - **Processamento de Dados:** Apache Spark (via PySpark)
@@ -62,7 +62,7 @@ graph TD;
 
 - **Orquestração e Ambiente:** Docker e Docker Compose
 
-### 🚀 Como Executar o Projeto
+### Como Executar o Projeto
 **Pré-requisitos:**
 - Git
 
@@ -83,7 +83,7 @@ graph TD;
 
 Este único comando irá construir a imagem da aplicação, baixar todas as dependências, iniciar o container do banco de dados e executar o pipeline completo de ponta a ponta. O processo pode levar vários minutos na primeira execução.
 
-### ✅ Como Verificar o Resultado
+### Como Verificar o Resultado
 Após a execução bem-sucedida, você pode verificar o resultado de duas formas:
 
 1. **Arquivos Físicos:**
@@ -108,7 +108,7 @@ O resultado final é carregado na tabela resultado_final_desafio. Você pode usa
 
 - **Senha:** `password`
 
-### 📄 Documentação de Referência
+### Documentação de Referência
 O layout e o schema dos arquivos brutos da Receita Federal foram baseados na documentação oficial disponibilizada pelo governo.
 
 - **Layout dos Arquivos:** [Metadados dos Dados Abertos de CNPJ](https://www.gov.br/receitafederal/dados/cnpj-metadados.pdf)
