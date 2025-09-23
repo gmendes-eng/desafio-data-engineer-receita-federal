@@ -10,6 +10,8 @@ O projeto segue o modelo de arquitetura Medallion, organizando os dados em três
 
 **Camada Bronze**
 
+A camada de dados brutos, dividida em três estágios para máxima rastreabilidade e resiliência:
+
 - `data/bronze/landing/archives/`: Contém os arquivos `.zip` originais baixados diretamente do endpoint da Receita Federal. Esta é a cópia fiel e imutável da fonte.
 
 - `data/bronze/landing/unzipped_csvs/`: Armazena os arquivos de dados extraídos dos `.zip` em seu formato original (CSV delimitado por ponto e vírgula  e texto de largura fixa).
@@ -17,6 +19,7 @@ O projeto segue o modelo de arquitetura Medallion, organizando os dados em três
 - `data/bronze/raw/`: Primeira camada persistida em um formato estruturado e confiável. Os dados da unzipped_csvs são lidos e gravados como tabelas Delta (`empresas.delta`, `socios.delta`), servindo como uma fonte única da verdade para as próximas etapas.
 
 **Camada Silver**
+
 A camada de dados limpos e enriquecidos.
 
 - `data/silver/`: As tabelas Delta da camada `raw` são lidas, e aqui aplicamos as transformações:
@@ -32,6 +35,7 @@ A camada de dados limpos e enriquecidos.
 - O resultado são novas tabelas Delta, limpas e prontas para a modelagem de negócio.
 
 **Camada Gold**
+
 A camada final, com dados agregados e modelados para consumo.
 
 - `data/gold/`: Contém a tabela de negócio final (`resultado_final.delta`). Esta tabela é criada a partir da camada Silver para responder a perguntas específicas do desafio, como:
@@ -75,6 +79,7 @@ A camada final, com dados agregados e modelados para consumo.
 └── requirements.txt        <-- Lista de bibliotecas Python necessárias.
 ```
 **Desenho da Arquitetura da Solução**
+
 O diagrama abaixo ilustra o fluxo completo, desde a fonte dos dados até o armazenamento final:
 
 ```mermaid
@@ -197,12 +202,16 @@ O fluxo de trabalho orquestrado pelo `main.py` executa as seguintes etapas:
 - Carregar os dados processados na tabela de destino, disponibilizando o resultado para consumo.
 
 ### 8. Evidências de Execução
+
 Esta seção apresenta evidências visuais do funcionamento do pipeline e do resultado final gerado.
+
 - **Resultado Final no Banco de Dados**
+
 A imagem abaixo demonstra a tabela `resultado_final_desafio` carregada com sucesso no banco de dados PostgreSQL.
 ![alt text](image.png)
 
 - **Logs de Execução do Pipeline**
+
 O screenshot a seguir exibe os logs do terminal após a conclusão do `docker-compose up`, mostrando a execução sequencial das etapas de ingestão, transformação e carga no banco de dados.
 ![alt text](image-1.png)
 
