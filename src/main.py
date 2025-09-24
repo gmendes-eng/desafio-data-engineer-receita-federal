@@ -2,21 +2,22 @@
 
 import logging
 from pyspark.sql import SparkSession
-from ingestion import executar_ingestao
-from transformations import bronze_para_raw, transformar_dados_silver, transformar_dados_gold
+from ingestion import baixar_arquivos_zipados, descompactar_arquivos, converter_csvs_para_delta
+from transformations import executar_transformacao_silver
+from aggregations import executar_agregacao_gold
 from database import carregar_dados_no_banco
 
-# Configura o logging para um formato claro, com data e nível da mensagem
+# Configura um logging para o orquestrador principal
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def main():
     """
-    Função principal que orquestra a execução do pipeline de dados,
-    com tratamento de erros e utilizando o formato Delta Lake.
+    Orquestrador principal do pipeline de dados da Receita Federal.
+    Executa cada camada e etapa da arquitetura Medallion em sequência.
     """
-    spark = None # Inicializa a variável spark
+    spark = None
     try:
-        # Adiciona os pacotes do Delta Lake e do PostgreSQL à configuração do Spark.
+        # Configuração do Spark, incluindo pacotes para Delta e PostgreSQL
         spark = SparkSession.builder \
             .appName("PipelineReceitaFederal") \
             .config("spark.jars.packages", "org.postgresql:postgresql:42.6.0,io.delta:delta-spark_2.12:3.2.0") \
@@ -25,33 +26,31 @@ def main():
             .master("local[*]") \
             .getOrCreate()
 
-        logging.info("Pipeline iniciado. SparkSession com Delta Lake criada.")
+        logging.info(">>> PIPELINE INICIADO: SparkSession criada com sucesso.")
 
         # --- ETAPAS DO PIPELINE ---
 
-        # 1. BRONZE (LANDING): Baixa os .zip e descompacta os CSVs na área de "pouso".
-        executar_ingestao()
-        
-        # 2. BRONZE (RAW): Converte os CSVs brutos para o formato Delta na área "raw".
-        bronze_para_raw(spark)
-        
-        # 3. SILVER: Lê da camada Raw(Delta), limpa, transforma e salva na camada Silver(Delta).
-        transformar_dados_silver(spark)
-        
-        # 4. GOLD: Lê da camada Silver(Delta), aplica regras de negócio e salva na camada Gold(Delta).
-        df_gold = transformar_dados_gold(spark)
+        # 1. CAMADA BRONZE (executada em três passos distintos)
+        baixar_arquivos_zipados()         # 1.1: Download dos arquivos originais
+        descompactar_arquivos()           # 1.2: Extração dos CSVs
+        converter_csvs_para_delta(spark)  # 1.3: Conversão para Delta (Raw)
 
-        # 5. LOAD: Carrega o DataFrame final da camada Gold no banco de dados PostgreSQL.
+        # 2. CAMADA SILVER
+        executar_transformacao_silver(spark)
+        
+        # 3. CAMADA GOLD
+        df_gold = executar_agregacao_gold(spark)
+        
+        # 4. CARGA NO BANCO DE DADOS
         carregar_dados_no_banco(df_gold)
 
-        logging.info("PIPELINE CONCLUÍDO COM SUCESSO!")
+        logging.info(">>> PIPELINE CONCLUÍDO COM SUCESSO!")
 
     except Exception as e:
-        logging.error(f"PIPELINE FALHOU. Erro: {e}")
-        # Relança a exceção para que o Docker retorne um status de erro
+        logging.error(f"!!! PIPELINE FALHOU. Erro: {e}", exc_info=True)
+        # Relança a exceção para que o Docker container saia com status de erro
         raise e
     finally:
-        # Garante que a sessão do Spark seja encerrada, mesmo se ocorrer um erro
         if spark:
             spark.stop()
             logging.info("SparkSession encerrada.")

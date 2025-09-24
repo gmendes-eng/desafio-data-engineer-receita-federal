@@ -69,7 +69,8 @@ A camada final, com dados agregados e modelados para consumo.
 │   ├── database.py         <-- Módulo de conexão e carga no banco de dados.
 │   ├── ingestion.py        <-- Script para ingestão e criação da Camada Bronze.
 │   ├── main.py             <-- Orquestrador principal que executa o pipeline.
-│   └── transformations.py  <-- Script para as transformações das camadas Silver e Gold.
+│   ├── transformations.py  <-- Script para as transformações da camadas Silver.
+│   └── aggregations.py     <-- Script para as agregações da camada Gold.
 │
 ├── .gitignore              <-- Especifica arquivos a serem ignorados pelo Git.
 ├── docker-compose.yml      <-- Orquestra os contêineres da aplicação (Python, DB, etc.).
@@ -191,12 +192,15 @@ O fluxo de trabalho orquestrado pelo `main.py` executa as seguintes etapas:
 - Descompactar os arquivos na pasta `landing/unzipped_csvs`.
 - Converter os arquivos brutos em tabelas Delta na camada raw.
 
-2. **Transformação (Silver & Gold)**: O script `transformations.py` é executado para:
+2. **Transformação (Silver)**: O script `transformations.py` é executado para:
 - Ler as tabelas Delta da camada `raw`.
 - Aplicar as limpezas e padronizações, gerando as tabelas da camada `silver`.
+
+3. **Agregação (Gold)**: O script `aggregation.py` é executado para:
+- Ler as tabelas Delta da camada `silver`.
 - Realizar as agregações e regras de negócio, criando a tabela final na camada `gold`.
 
-3. **Carregamento (Load)**: O script `database.py` é responsável por:
+4. **Carregamento (Load)**: O script `database.py` é responsável por:
 - Ler a tabela final da camada `gold`.
 - Conectar-se ao banco de dados PostgreSQL.
 - Carregar os dados processados na tabela de destino, disponibilizando o resultado para consumo.
