@@ -81,52 +81,9 @@ A camada final, com dados agregados e modelados para consumo.
 ```
 **Desenho da Arquitetura da Solução**
 
-O diagrama abaixo ilustra o fluxo completo, desde a fonte dos dados até o armazenamento final:
+A imagem abaixo ilustra a arquitetura do projeto, desde a fonte dos dados até o armazenamento final:
 
-```mermaid
-graph TD
-    %% Fonte de Dados Externa
-    A[Fonte de Dados Externa<br/>Receita Federal<br/>Arquivos .zip] --> B
-
-    %% Container da Aplicação (Dockerizado)
-    subgraph Docker ["Ambiente Dockerizado"]
-        subgraph AppContainer ["Container da Aplicação - app_stone"]
-            B[1. Ingestão<br/>ingestion.py] --> C[Bronze<br/>CSVs brutos]
-            C --> D[2. Transformação<br/>PySpark<br/>transformations.py]
-            
-            D --> E[Silver<br/>Parquet limpo]
-            E --> F[Gold<br/>Parquet agregado]
-        end
-        
-        subgraph DBContainer ["Container do Banco de Dados"]
-            G[3. Armazenamento<br/>PostgreSQL<br/>Tabela Final]
-        end
-        
-        F --> G
-    end
-    
-    %% Consumidores Finais
-    subgraph Consumers ["Consumidores Finais"]
-        H[4. Consumo]
-    end
-    
-    G --> H
-
-    %% Estilos
-    classDef external fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef bronze fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef silver fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef gold fill:#fff8e1,stroke:#ff6f00,stroke-width:2px
-    classDef database fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
-    classDef consumer fill:#fce4ec,stroke:#880e4f,stroke-width:2px
-    
-    class A external
-    class C bronze
-    class E silver
-    class F gold
-    class G database
-    class H consumer
-```
+![alt text](image-4.png)
 
 ### 4. Tecnologias Utilizadas
 - **Linguagem:** Python 3.12
