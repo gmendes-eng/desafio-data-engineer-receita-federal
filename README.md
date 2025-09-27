@@ -3,8 +3,6 @@
 ### 1. Objetivo
 Este projeto tem como objetivo realizar a ingestão e o processamento de dados cadastrais de empresas e sócios, disponibilizados publicamente pela Receita Federal. O pipeline de dados foi construído para extrair, transformar e carregar essas informações, culminando em uma tabela final com indicadores de negócio específicos.
 
-O desafio avalia a aplicação de boas práticas de engenharia de dados e software, desde a ingestão via endpoint até a modelagem final dos dados.
-
 ### 2. Arquitetura de Dados: Medallion com Delta Lake
 O projeto segue o modelo de arquitetura Medallion, organizando os dados em três camadas distintas (Bronze, Silver e Gold) para garantir qualidade, governança e performance. Para as camadas de dados estruturados, utilizamos o formato **Delta Lake**, que oferece transações ACID, versionamento de dados e confiabilidade sobre o Data Lake.
 
